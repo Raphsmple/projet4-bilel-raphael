@@ -211,3 +211,222 @@ def home():
     return {
         "message": "Cinema API opérationnelle"
     }
+
+# =========================
+# CRUD MOVIES
+# =========================
+
+@app.get("/movies")
+def get_movies():
+    return movies
+
+
+@app.get("/movies/{movie_id}")
+def get_movie(movie_id: int):
+    for movie in movies:
+        if movie.id == movie_id:
+            return movie
+
+    return {"error": "Film introuvable"}
+
+
+@app.post("/movies")
+def create_movie(movie: Movie):
+    movies.append(movie)
+    return movie
+
+
+@app.put("/movies/{movie_id}")
+def update_movie(movie_id: int, updated_movie: Movie):
+    for index, movie in enumerate(movies):
+        if movie.id == movie_id:
+            movies[index] = updated_movie
+            return updated_movie
+
+    return {"error": "Film introuvable"}
+
+
+@app.delete("/movies/{movie_id}")
+def delete_movie(movie_id: int):
+    for index, movie in enumerate(movies):
+        if movie.id == movie_id:
+            deleted_movie = movies.pop(index)
+            return deleted_movie
+
+    return {"error": "Film introuvable"}
+
+
+# =========================
+# CRUD ACTORS
+# =========================
+
+@app.get("/actors")
+def get_actors():
+    return actors
+
+
+@app.get("/actors/{actor_id}")
+def get_actor(actor_id: int):
+    for actor in actors:
+        if actor.id == actor_id:
+            return actor
+
+    return {"error": "Acteur introuvable"}
+
+
+@app.post("/actors")
+def create_actor(actor: Actor):
+    actors.append(actor)
+    return actor
+
+
+@app.put("/actors/{actor_id}")
+def update_actor(actor_id: int, updated_actor: Actor):
+    for index, actor in enumerate(actors):
+        if actor.id == actor_id:
+            actors[index] = updated_actor
+            return updated_actor
+
+    return {"error": "Acteur introuvable"}
+
+
+@app.delete("/actors/{actor_id}")
+def delete_actor(actor_id: int):
+    for index, actor in enumerate(actors):
+        if actor.id == actor_id:
+            deleted_actor = actors.pop(index)
+            return deleted_actor
+
+    return {"error": "Acteur introuvable"}
+
+
+# =========================
+# CRUD ROOMS
+# =========================
+
+@app.get("/rooms")
+def get_rooms():
+    return rooms
+
+
+@app.get("/rooms/{room_id}")
+def get_room(room_id: int):
+    for room in rooms:
+        if room.id == room_id:
+            return room
+
+    return {"error": "Salle introuvable"}
+
+
+@app.post("/rooms")
+def create_room(room: Room):
+    rooms.append(room)
+    return room
+
+
+@app.put("/rooms/{room_id}")
+def update_room(room_id: int, updated_room: Room):
+    for index, room in enumerate(rooms):
+        if room.id == room_id:
+            rooms[index] = updated_room
+            return updated_room
+
+    return {"error": "Salle introuvable"}
+
+
+@app.delete("/rooms/{room_id}")
+def delete_room(room_id: int):
+    for index, room in enumerate(rooms):
+        if room.id == room_id:
+            deleted_room = rooms.pop(index)
+            return deleted_room
+
+    return {"error": "Salle introuvable"}
+
+
+# =========================
+# CRUD SESSIONS
+# =========================
+
+@app.get("/sessions")
+def get_sessions():
+    return sessions
+
+
+@app.get("/sessions/{session_id}")
+def get_session(session_id: int):
+    for session in sessions:
+        if session.id == session_id:
+            return session
+
+    return {"error": "Séance introuvable"}
+
+
+@app.post("/sessions")
+def create_session(session: Session):
+    sessions.append(session)
+    return session
+
+
+@app.put("/sessions/{session_id}")
+def update_session(session_id: int, updated_session: Session):
+    for index, session in enumerate(sessions):
+        if session.id == session_id:
+            sessions[index] = updated_session
+            return updated_session
+
+    return {"error": "Séance introuvable"}
+
+
+@app.delete("/sessions/{session_id}")
+def delete_session(session_id: int):
+    for index, session in enumerate(sessions):
+        if session.id == session_id:
+            deleted_session = sessions.pop(index)
+            return deleted_session
+
+    return {"error": "Séance introuvable"}
+
+
+# =========================
+# CRUD TICKETS
+# =========================
+
+@app.get("/tickets")
+def get_tickets():
+    return tickets
+
+
+@app.get("/tickets/{ticket_id}")
+def get_ticket(ticket_id: int):
+    for ticket in tickets:
+        if ticket.id == ticket_id:
+            return ticket
+
+    return {"error": "Billet introuvable"}
+
+
+@app.post("/tickets")
+def create_ticket(ticket: Ticket):
+    tickets.append(ticket)
+    return ticket
+
+
+@app.put("/tickets/{ticket_id}")
+def update_ticket(ticket_id: int, updated_ticket: Ticket):
+    for index, ticket in enumerate(tickets):
+        if ticket.id == ticket_id:
+            tickets[index] = updated_ticket
+            return updated_ticket
+
+    return {"error": "Billet introuvable"}
+
+
+@app.delete("/tickets/{ticket_id}")
+def delete_ticket(ticket_id: int):
+    for index, ticket in enumerate(tickets):
+        if ticket.id == ticket_id:
+            deleted_ticket = tickets.pop(index)
+            return deleted_ticket
+
+    return {"error": "Billet introuvable"}
