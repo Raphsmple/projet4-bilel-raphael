@@ -1,6 +1,6 @@
 from enum import Enum
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 
@@ -104,6 +104,22 @@ class Ticket(BaseModel):
 
 
 # =========================
+# MODELES DE REPONSE
+# =========================
+
+class ActorResponse(BaseModel):
+    id: int
+    name: str
+    nationality: str
+
+
+class TicketResponse(BaseModel):
+    id: int
+    session_id: int
+    seat_number: int
+
+
+# =========================
 # DONNEES DE DEPART
 # =========================
 
@@ -203,7 +219,7 @@ tickets = [
 
 
 # =========================
-# ROUTE DE TEST
+# ROUTE PRINCIPALE
 # =========================
 
 @app.get("/")
@@ -211,6 +227,7 @@ def home():
     return {
         "message": "Cinema API opérationnelle"
     }
+
 
 # =========================
 # CRUD MOVIES
@@ -227,7 +244,10 @@ def get_movie(movie_id: int):
         if movie.id == movie_id:
             return movie
 
-    return {"error": "Film introuvable"}
+    raise HTTPException(
+        status_code=404,
+        detail="Film introuvable"
+    )
 
 
 @app.post("/movies")
@@ -236,14 +256,17 @@ def create_movie(movie: Movie):
     return movie
 
 
-@app.put("/movies/{movie_id}")
+@app.patch("/movies/{movie_id}")
 def update_movie(movie_id: int, updated_movie: Movie):
     for index, movie in enumerate(movies):
         if movie.id == movie_id:
             movies[index] = updated_movie
             return updated_movie
 
-    return {"error": "Film introuvable"}
+    raise HTTPException(
+        status_code=404,
+        detail="Film introuvable"
+    )
 
 
 @app.delete("/movies/{movie_id}")
@@ -253,25 +276,31 @@ def delete_movie(movie_id: int):
             deleted_movie = movies.pop(index)
             return deleted_movie
 
-    return {"error": "Film introuvable"}
+    raise HTTPException(
+        status_code=404,
+        detail="Film introuvable"
+    )
 
 
 # =========================
 # CRUD ACTORS
 # =========================
 
-@app.get("/actors")
+@app.get("/actors", response_model=list[ActorResponse])
 def get_actors():
     return actors
 
 
-@app.get("/actors/{actor_id}")
+@app.get("/actors/{actor_id}", response_model=ActorResponse)
 def get_actor(actor_id: int):
     for actor in actors:
         if actor.id == actor_id:
             return actor
 
-    return {"error": "Acteur introuvable"}
+    raise HTTPException(
+        status_code=404,
+        detail="Acteur introuvable"
+    )
 
 
 @app.post("/actors")
@@ -280,14 +309,17 @@ def create_actor(actor: Actor):
     return actor
 
 
-@app.put("/actors/{actor_id}")
+@app.patch("/actors/{actor_id}")
 def update_actor(actor_id: int, updated_actor: Actor):
     for index, actor in enumerate(actors):
         if actor.id == actor_id:
             actors[index] = updated_actor
             return updated_actor
 
-    return {"error": "Acteur introuvable"}
+    raise HTTPException(
+        status_code=404,
+        detail="Acteur introuvable"
+    )
 
 
 @app.delete("/actors/{actor_id}")
@@ -297,7 +329,10 @@ def delete_actor(actor_id: int):
             deleted_actor = actors.pop(index)
             return deleted_actor
 
-    return {"error": "Acteur introuvable"}
+    raise HTTPException(
+        status_code=404,
+        detail="Acteur introuvable"
+    )
 
 
 # =========================
@@ -315,7 +350,10 @@ def get_room(room_id: int):
         if room.id == room_id:
             return room
 
-    return {"error": "Salle introuvable"}
+    raise HTTPException(
+        status_code=404,
+        detail="Salle introuvable"
+    )
 
 
 @app.post("/rooms")
@@ -324,14 +362,17 @@ def create_room(room: Room):
     return room
 
 
-@app.put("/rooms/{room_id}")
+@app.patch("/rooms/{room_id}")
 def update_room(room_id: int, updated_room: Room):
     for index, room in enumerate(rooms):
         if room.id == room_id:
             rooms[index] = updated_room
             return updated_room
 
-    return {"error": "Salle introuvable"}
+    raise HTTPException(
+        status_code=404,
+        detail="Salle introuvable"
+    )
 
 
 @app.delete("/rooms/{room_id}")
@@ -341,7 +382,10 @@ def delete_room(room_id: int):
             deleted_room = rooms.pop(index)
             return deleted_room
 
-    return {"error": "Salle introuvable"}
+    raise HTTPException(
+        status_code=404,
+        detail="Salle introuvable"
+    )
 
 
 # =========================
@@ -359,23 +403,51 @@ def get_session(session_id: int):
         if session.id == session_id:
             return session
 
-    return {"error": "Séance introuvable"}
+    raise HTTPException(
+        status_code=404,
+        detail="Séance introuvable"
+    )
 
 
 @app.post("/sessions")
 def create_session(session: Session):
+    movie_exists = any(
+        movie.id == session.movie_id
+        for movie in movies
+    )
+
+    room_exists = any(
+        room.id == session.room_id
+        for room in rooms
+    )
+
+    if not movie_exists:
+        raise HTTPException(
+            status_code=404,
+            detail="Le film associé à cette séance n'existe pas"
+        )
+
+    if not room_exists:
+        raise HTTPException(
+            status_code=404,
+            detail="La salle associée à cette séance n'existe pas"
+        )
+
     sessions.append(session)
     return session
 
 
-@app.put("/sessions/{session_id}")
+@app.patch("/sessions/{session_id}")
 def update_session(session_id: int, updated_session: Session):
     for index, session in enumerate(sessions):
         if session.id == session_id:
             sessions[index] = updated_session
             return updated_session
 
-    return {"error": "Séance introuvable"}
+    raise HTTPException(
+        status_code=404,
+        detail="Séance introuvable"
+    )
 
 
 @app.delete("/sessions/{session_id}")
@@ -385,41 +457,61 @@ def delete_session(session_id: int):
             deleted_session = sessions.pop(index)
             return deleted_session
 
-    return {"error": "Séance introuvable"}
+    raise HTTPException(
+        status_code=404,
+        detail="Séance introuvable"
+    )
 
 
 # =========================
 # CRUD TICKETS
 # =========================
 
-@app.get("/tickets")
+@app.get("/tickets", response_model=list[TicketResponse])
 def get_tickets():
     return tickets
 
 
-@app.get("/tickets/{ticket_id}")
+@app.get("/tickets/{ticket_id}", response_model=TicketResponse)
 def get_ticket(ticket_id: int):
     for ticket in tickets:
         if ticket.id == ticket_id:
             return ticket
 
-    return {"error": "Billet introuvable"}
+    raise HTTPException(
+        status_code=404,
+        detail="Billet introuvable"
+    )
 
 
 @app.post("/tickets")
 def create_ticket(ticket: Ticket):
+    session_exists = any(
+        session.id == ticket.session_id
+        for session in sessions
+    )
+
+    if not session_exists:
+        raise HTTPException(
+            status_code=404,
+            detail="La séance associée à ce billet n'existe pas"
+        )
+
     tickets.append(ticket)
     return ticket
 
 
-@app.put("/tickets/{ticket_id}")
+@app.patch("/tickets/{ticket_id}")
 def update_ticket(ticket_id: int, updated_ticket: Ticket):
     for index, ticket in enumerate(tickets):
         if ticket.id == ticket_id:
             tickets[index] = updated_ticket
             return updated_ticket
 
-    return {"error": "Billet introuvable"}
+    raise HTTPException(
+        status_code=404,
+        detail="Billet introuvable"
+    )
 
 
 @app.delete("/tickets/{ticket_id}")
@@ -429,7 +521,11 @@ def delete_ticket(ticket_id: int):
             deleted_ticket = tickets.pop(index)
             return deleted_ticket
 
-    return {"error": "Billet introuvable"}
+    raise HTTPException(
+        status_code=404,
+        detail="Billet introuvable"
+    )
+
 
 # =========================
 # RECHERCHE, FILTRES, TRI ET PAGINATION
@@ -445,7 +541,6 @@ def search_movies(
 ):
     result = movies
 
-    # Recherche par titre
     if title is not None:
         result = [
             movie
@@ -453,7 +548,6 @@ def search_movies(
             if title.lower() in movie.title.lower()
         ]
 
-    # Filtre par genre
     if genre is not None:
         result = [
             movie
@@ -461,14 +555,18 @@ def search_movies(
             if movie.genre == genre
         ]
 
-    # Tri
     if sort_by == "title":
-        result = sorted(result, key=lambda movie: movie.title)
+        result = sorted(
+            result,
+            key=lambda movie: movie.title
+        )
 
     elif sort_by == "duration":
-        result = sorted(result, key=lambda movie: movie.duration)
+        result = sorted(
+            result,
+            key=lambda movie: movie.duration
+        )
 
-    # Pagination
     start = (page - 1) * limit
     end = start + limit
 
@@ -478,6 +576,7 @@ def search_movies(
         "total": len(result),
         "movies": result[start:end]
     }
+
 
 # =========================
 # STATISTIQUES
@@ -491,7 +590,10 @@ def get_stats():
     total_sessions = len(sessions)
     total_tickets = len(tickets)
 
-    total_revenue = sum(ticket.price for ticket in tickets)
+    total_revenue = sum(
+        ticket.price
+        for ticket in tickets
+    )
 
     return {
         "total_movies": total_movies,
