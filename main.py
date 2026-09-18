@@ -430,3 +430,74 @@ def delete_ticket(ticket_id: int):
             return deleted_ticket
 
     return {"error": "Billet introuvable"}
+
+# =========================
+# RECHERCHE, FILTRES, TRI ET PAGINATION
+# =========================
+
+@app.get("/search/movies")
+def search_movies(
+    title: str | None = None,
+    genre: MovieGenre | None = None,
+    page: int = 1,
+    limit: int = 10,
+    sort_by: str = "title"
+):
+    result = movies
+
+    # Recherche par titre
+    if title is not None:
+        result = [
+            movie
+            for movie in result
+            if title.lower() in movie.title.lower()
+        ]
+
+    # Filtre par genre
+    if genre is not None:
+        result = [
+            movie
+            for movie in result
+            if movie.genre == genre
+        ]
+
+    # Tri
+    if sort_by == "title":
+        result = sorted(result, key=lambda movie: movie.title)
+
+    elif sort_by == "duration":
+        result = sorted(result, key=lambda movie: movie.duration)
+
+    # Pagination
+    start = (page - 1) * limit
+    end = start + limit
+
+    return {
+        "page": page,
+        "limit": limit,
+        "total": len(result),
+        "movies": result[start:end]
+    }
+
+# =========================
+# STATISTIQUES
+# =========================
+
+@app.get("/stats")
+def get_stats():
+    total_movies = len(movies)
+    total_actors = len(actors)
+    total_rooms = len(rooms)
+    total_sessions = len(sessions)
+    total_tickets = len(tickets)
+
+    total_revenue = sum(ticket.price for ticket in tickets)
+
+    return {
+        "total_movies": total_movies,
+        "total_actors": total_actors,
+        "total_rooms": total_rooms,
+        "total_sessions": total_sessions,
+        "total_tickets": total_tickets,
+        "total_revenue": total_revenue
+    }
